@@ -1,0 +1,37 @@
+input {
+    margin: 2rem;
+    height: 3rem;
+    font-size: 24px;
+    font-weight: 300;
+    border: none;
+    border-bottom: 3px solid black;
+    background: transparent;
+    outline: none;
+    letter-spacing: 1.75px;
+    margin: 0;
+}
+
+.suggestionList {
+    z-index: 1;
+    background-color: white;
+    list-style-type: none;
+    border: 1px solid black;
+    border-top: none;
+    box-sizing: border-box;
+    margin: 0;
+
+    li {
+        padding: 1rem;
+
+        &.active {
+            background-color: #f2d8d6;
+        }
+    }
+}
+
+input,
+.suggestionList {
+    min-width: 300px;
+    width: 40%;
+    padding: 0;
+}
