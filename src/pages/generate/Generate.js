@@ -1,6 +1,6 @@
 import React from "react";
 import "./Generate.scss";
-import PlaylistGenerator from "../PlaylistGenerator/PlaylistGenerator";
+import PlaylistGenerator from "../../components/PlaylistGenerator/PlaylistGenerator";
 
 function Generate() {
     return (

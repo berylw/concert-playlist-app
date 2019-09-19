@@ -1,9 +1,9 @@
 import React from "react";
 import { BrowserRouter, Route, NavLink } from "react-router-dom";
 import "./App.scss";
-import Generate from "../generate/Generate";
-import Discovery from "../discover/Discover";
-import Library from "../library/Library";
+import Generate from "../../pages/generate/Generate";
+import Discovery from "../../pages/discover/Discover";
+import Library from "../../pages/library/Library";
 
 function App() {
     return (
