@@ -5,19 +5,26 @@ import "./PlaylistGenerator.scss";
 
 export class PlaylistGenerator extends Component {
     static propTypes = {
-        suggestions: PropTypes.instanceOf(Array).isRequired
+        /**
+         * Object representing all possible artists. mapping Spotify artist id to an object containing remaining artist properties
+         *
+         * Eg. {id1: { name: 'artist1' }, id2: { name: 'artist2' }, id3: { 'artist2' }}
+         */
+        suggestions: PropTypes.instanceOf(Object).isRequired
     };
 
     constructor(props) {
         super(props);
         this.state = {
             userInput: "",
+            // Array of artist objects matching user input, e.g. [{ id: 'id1', name: 'artist1' }, { id: 'id2', name: 'artist2' }]
             filteredSuggestions: [],
+            // Active index in filteredSuggestions
             activeSuggestionIndex: 0,
             showSuggestions: false,
-            selectedArtists: []
+            selectedArtists: [],
+            suggestions: this.props.suggestions
         };
-
         this.onChange = this.onChange.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.renderSuggestionList = this.renderSuggestionList.bind(this);
@@ -26,10 +33,17 @@ export class PlaylistGenerator extends Component {
 
     onChange(e) {
         const userInput = e.target.value;
-        const filteredSuggestions = this.props.suggestions.filter(
-            suggestion =>
-                suggestion.toLowerCase().indexOf(userInput.toLowerCase()) > -1
-        );
+        const filteredSuggestions = [];
+        Object.entries(this.state.suggestions).forEach(([artistId, artist]) => {
+            if (
+                artist.name.toLowerCase().indexOf(userInput.toLowerCase()) > -1
+            ) {
+                filteredSuggestions.push({
+                    id: artistId,
+                    ...artist
+                });
+            }
+        });
 
         this.setState({
             activeSuggestionIndex: 0,
@@ -40,14 +54,26 @@ export class PlaylistGenerator extends Component {
     }
 
     onKeyDown(e) {
-        const { activeSuggestionIndex, filteredSuggestions } = this.state;
+        const {
+            activeSuggestionIndex,
+            filteredSuggestions,
+            suggestions
+        } = this.state;
         const selectedArtist = filteredSuggestions[activeSuggestionIndex];
         if (!this.state.showSuggestions) return;
 
         if (e.key === "Enter") {
+            if (suggestions[selectedArtist.id].disabled) return;
+            const updatedFilteredSuggestions = filteredSuggestions;
+            const updatedSuggestions = suggestions;
+            updatedSuggestions[selectedArtist.id].disabled = true;
+            updatedFilteredSuggestions[activeSuggestionIndex].disabled = true;
+
             this.setState({
-                userInput: filteredSuggestions[activeSuggestionIndex],
+                userInput: selectedArtist.name,
                 showSuggestions: false,
+                suggestions: updatedSuggestions,
+                filteredSuggestions: updatedFilteredSuggestions,
                 selectedArtists: this.state.selectedArtists.concat(
                     selectedArtist
                 )
@@ -81,20 +107,18 @@ export class PlaylistGenerator extends Component {
 
     renderSuggestionList() {
         if (!this.state.showSuggestions) return null;
-        const suggestions = this.state.filteredSuggestions.map(
-            (suggestion, index) => (
-                <li
-                    key={suggestion}
-                    className={
-                        index === this.state.activeSuggestionIndex
-                            ? "active"
-                            : ""
-                    }
-                >
-                    {suggestion}
+        const suggestions = [];
+        this.state.filteredSuggestions.forEach((artist, index) => {
+            const classNames = [];
+            if (index === this.state.activeSuggestionIndex)
+                classNames.push("active");
+            if (artist.disabled) classNames.push("disabled");
+            suggestions.push(
+                <li key={artist.id} className={classNames.join(" ")}>
+                    {artist.name}
                 </li>
-            )
-        );
+            );
+        });
         return <ul className="suggestionList">{suggestions}</ul>;
     }
 
@@ -103,7 +127,7 @@ export class PlaylistGenerator extends Component {
         const selectedArtists = this.state.selectedArtists.map(
             (artist, index) => (
                 <span key={index} className="selectedArtist">
-                    {artist}
+                    {artist.name}
                 </span>
             )
         );
